@@ -49,5 +49,5 @@ for blood samples collected around age 15.
          aries$meth <- aries.methylation(aries)
 
 A more complete example including a basic EWAS
-is also [available](http://htmlpreview.github.io/?https://github.com/MRCIEU/aries/docs/tutorial/tutorial.html).
+is also [available](http://htmlpreview.github.io/?https://github.com/MRCIEU/aries/blob/master/docs/tutorial/tutorial.html).
 
