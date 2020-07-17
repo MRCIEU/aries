@@ -10,4 +10,9 @@ source("run-test.r")
 
 Expected outputs can be found in the folder `test-output`.
 
+*The tests do load and make use of ALSPAC
+data using the `alspac` R package.
+Consequently, only direct ALSPAC users will be
+able to run the tests.*
+
 

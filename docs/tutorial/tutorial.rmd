@@ -100,7 +100,7 @@ for the specified set of samples.
 There is one column for each sample and
 one row for each CpG site. 
 
-## Load ALSPAC phenotype/exposure variables 
+## Load ALSPAC phenotype/exposure variables (*direct ALSPAC users only*)
 
 Direct users of ALSPAC can load ALSPAC
 data into R using the `alspac` R package
