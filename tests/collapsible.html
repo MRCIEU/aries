@@ -1,0 +1,47 @@
+<style>
+p.collapsible {
+  border: 1px solid #E0E0E0;
+  color: #A0A0A0;
+  background-color: #E0E0E0;
+  width: max-content;
+  padding: 0px;
+  margin: 0px;
+}
+</style>
+
+
+
+<script type="text/javascript">
+window.onload = function() {
+  var pres = document.querySelectorAll('pre');
+
+  for (i = 0; i < pres.length; i++) {
+    var hid = "collapsible-p" + i;
+    var cid = "collapsible-d" + i;
+    pres[i].innerHTML = ("<p class='collapsible' id='" + hid + "'>+code</p>" +
+                        "<div class='collapsible' id='" + cid + "'>" + 
+                         pres[i].innerHTML + 
+                         "</div>");  
+  }
+
+  var heads = document.querySelectorAll("p.collapsible");
+  for (i = 0; i < heads.length; i++) {
+    heads[i].onclick = function(e) {
+      var cid = "collapsible-d" + e.target.id.substr(13);
+      var collapsible = document.getElementById(cid);
+      if (collapsible.style.display == "block") {
+         this.innerHTML = "+code";
+         collapsible.style.display = "none";
+      }
+      else {
+         this.innerHTML = "-hide";
+         collapsible.style.display = "block";
+      }
+    };   
+  }
+  var collapsibles = document.querySelectorAll("div.collapsible");
+  for (i = 0; i < collapsibles.length; i++) {
+     collapsibles[i].style.display = "none";
+  }
+}
+</script>

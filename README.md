@@ -1,8 +1,10 @@
+# aries
+
 Functions for loading the
 [http://www.ariesepigenomics.org.uk/](ARIES)
 DNA methylation profiles.
 
-# aries
+## Accessible Resource for Integrated Epigenomic Studies (ARIES)
 
 The Accessible Resource for Integrated Epigenomic Studies (ARIES) is a
 BBSRC-funded resource of epigenomic information on a range of human
@@ -36,15 +38,16 @@ Load `devtools` and then install `aries`.
          library(devtools)
          install_github("MRCIEU/aries")
 
-## Example
+## Examples
 
 The following example shows how to load the methylation profiles
 for blood samples collected around age 15.
 
          library(aries)
-		 aries.dir <- [ ... directory ... ]
-		 aries <- aries.select(aries.dir, featurset="common", time.point="15up")
-		 aries$meth <- aries.methylation(aries)
+         aries.dir <- "path/to/aries"
+         aries <- aries.select(aries.dir, time.point="15up")
+         aries$meth <- aries.methylation(aries)
 
-
+A more complete example including a basic EWAS
+is also [available](http://htmlpreview.github.io/?https://github.com/MRCIEU/aries/docs/tutorial/tutorial.html).
 

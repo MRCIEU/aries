@@ -1,0 +1,221 @@
+# Test `aries`
+
+```{r rmd-init, echo=FALSE, message=F}
+library(knitr)
+options(knitr.kable.NA= '')
+library(Cairo)
+library(ggplot2)
+opts_chunk$set(warning=FALSE,
+               message=FALSE,
+               fig.width=6, fig.height=6, dev="CairoPNG",
+               stop=TRUE)
+read_chunk('test.r')
+options(stringsAsFactors=F)
+```
+
+We start by loading the package
+and saving the directory containing the ARIES data.
+```{r aries-init}
+```
+
+We will load ALSPAC data later as part of the test. 
+For this we will use the `alspac` R package.
+```{r alspac-init}
+```
+
+## Test `aries.feature.sets()`
+
+```{r check-aries.feature.sets}
+```
+
+## Test `aries.time.points()`
+
+```{r check-aries.feature.sets}
+```
+
+## Test `aries.select()`
+
+We test `aries.select()` verifying that manually merging
+subsets of samples gives the same result and requesting
+all samples at the same time.
+
+Constuct datasets with all age 15-17 year-old profiles,
+just Illumina 450k profiles,
+and just Illumina EPIC profiles
+using `aries.select()`.
+
+```{r apply-aries.select}
+```
+
+From the 450k and EPIC-only datasets,
+construct a combined dataset manually.
+```{r combine-manually}
+```
+
+For the comparison, we will need a function to determine
+if two matrices are identical apart from different
+row orderings. 
+```{r identical.rows}
+```
+
+Check `aries.select()$cell.counts`:
+```{r check-aries.select-cell.counts}
+```
+
+Check `aries.select()$samples`:
+```{r check-aries.select-samples}
+```
+
+Checking `aries.select()$control.matrix` is slightly more
+complicated because the controls in the 450k and EPIC bead chips
+are somewhat different. Instead of checking for a perfect match,
+we verify that the control probe intensities are most correlated
+for matching samples than for mismatching samples.
+```{r check-aries.select-samples}
+```
+
+## Test `aries.methylation()`
+
+We test `aries.methylation()` by testing associations of DNA methylation with:
+
+- gestational age
+- birthweight
+- BMI
+- alcohol intake
+- smoking
+- prenatal tobacco exposure
+- age
+- sex
+
+### Preparing data for analyses
+
+We load these exposure and phenotype variables from ALSPAC
+as a data frame `alspac` ...
+```{r load-alspac}
+```
+
+... EWAS summary statistics ...
+```{r load-ewas}
+```
+
+... DNAm alcohol models ...
+```{r load-alcohol-models}
+```
+
+... DNAm age models ...
+```{r load-age-models}
+```
+
+... add DNAm models for prenatal tobacco exposure,
+BMI, smoking, and sex ...
+```{r add-models}
+```
+
+... collect CpG sites from EWAS summary statistics and DNAm models ...
+```{r collect-cpg-sites}
+```
+
+... load ARIES DNAm profiles ...
+```{r load-methylation}
+```
+
+... add ALSPAC exposure and phenotype variables to ARIES ...
+```{r add-alspac-vars}
+```
+
+... and finally define functions for testing CpG site associations.
+```{r test-assocs}
+```
+
+### Correlation with published EWAS effects
+
+We fit models to test associations with DNAm
+and calculate correlations between the effects we observe
+here and effects reported in the literature.
+```{r test-effect-correlations}
+```
+
+```{r,results="asis"}
+kable(r.effects, digits=2)
+```
+
+As expected, correlation of:
+- sex effects is nearly perfect.
+- smoking effects roughly increases with time spent smoking to nearly perfect in middle age.
+- prenatal smoking effects is high at birth and then decreases. Interestingly, the correlations settle around R=0.6 from age 3.5 (43 months) onward and is consistent with effects observed many years after birth (PMID29860346).
+- birthweight is high at birth and then very inconsistent afterward (PMID25869828).  The >0.5 correlations at ages 7 and 9 appear to be real. The lack of correlation between birth and age 7 is likely due to extremely small sample sizes at those time points.
+- gestational age is high at birth and then mostly disappears (PMID25869828).
+- BMI is high in adults (it was derived in adults) and lower in children.
+
+### Correlations with published DNAm models of continuous phenotypes/exposures
+
+```{r test-model-correlations}
+```
+
+```{r,results="asis"}
+kable(r.models, digits=2)
+```
+
+As expected, correlation of model scores with:
+- age increases with age (models were developed in adults) and is highest where there is greatest age variation.
+- BMI increases with age (models were developed in adults) with correlations similar to those published (PMID32228717).
+- gestational age was high at expected levels at birth (PMID28932320) and then essentially null elsewhere.
+- cotinine were quite high (R>0.45), however lower than published in another study (R=0.65, PMID24120260).
+- alcohol were similar to those previously published (PMID31775873).
+- audit score were similar to those previously published (PMID31775873).
+
+### AUC for published DNAm models of binary exposures
+
+```{r test-model-auc}
+```
+
+```{r,results="asis"}
+kable(r.auc, digits=2)
+```
+
+As expected, AUC for DNAm models of:
+- prenatal tobacco exposure was high (above 0.8) as published (PMID27323799).
+- sex were nearly perfect.
+- smoking was high for long-term smokers (above or near 0.9) and somewhat lower for newer smokers. 
+
+### Evaluations of DNAm age acceleration (Hannum)
+
+```{r calculate-dnam-age}
+```
+
+Correlation of DNAm age estimates is quite high as expected
+across all of ARIES (R = `r with(aries$all$samples, cor(age.hannum, age, use="p"))`).
+
+```{r,echo=F}
+print(ggplot(aries$all$samples,
+             aes(x=age,
+                 y=age.hannum,
+                 color=factor(time_point))) +
+      geom_point())
+```
+
+
+Consistent with the literature (PMID27511193),
+adult males tend to have higher age acceleration than females.
+
+```{r dnam-aa-by-sex}
+```
+
+```{r,results="asis"}
+kable(dnam.aa.by.sex,digits=2)
+```
+(The 'middle age' group combines ALSPAC mothers and fathers
+at middle age, i.e. time points 'FOM' and 'FOF'). 
+
+```{r,echo=F}
+dat <- aries$all$samples
+dat$group <- group
+dat <- dat[!is.na(dat$group),]
+print(ggplot(dat,
+             aes(x=group,
+                 y=age.accel,
+                 fill=sex)) +
+      geom_boxplot(position=position_dodge(1)))
+```
+
+

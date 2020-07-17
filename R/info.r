@@ -26,25 +26,23 @@ aries.info <- function(path) {
     gds.filenames <- list.files(file.path(path, "betas"), pattern=".gds$", full.names=T)
     names(gds.filenames) <- sub(".gds$", "", basename(gds.filenames))
     sapply(names(gds.filenames), function(featureset) {
-        gds.filename <- gds.filenames[featureset]
-
-        gds.file <- openfn.safe.gds(gds.filename)        
-        sample.names <- read.gdsn(index.gdsn(gds.file, "col.names"))
+        gds.filename <- gds.filenames[[featureset]]
+        gds.file <- openfn.gds.safe(gds.filename)
+        on.exit(closefn.gds(gds.file))
         probe.names <- read.gdsn(index.gdsn(gds.file, "row.names"))
-        closefn.gds(gds.file)
+        sample.names <- read.gdsn(index.gdsn(gds.file, "col.names"))
 
         samples <- samples[match(sample.names, samples$Sample_Name),]
         
         control.matrix <- read.table(file.path(path, "control_matrix", paste(featureset, "txt", sep=".")),
-                                     row.names=1, header=T, sep="\t")
+                                     row.names=1, header=T, sep="\t",check.names=F)
+        control.matrix <- as.matrix(control.matrix)
 
         cell.count.filenames <- list.files(file.path(path, "derived", "cellcounts"), ".txt$", full.names=T)
         counts <- sapply(cell.count.filenames, read.table, sep="\t", row.names=1, header=T, simplify=F)
         names(counts) <- sub(".txt", "", sapply(names(counts), basename))
-        overlaps <- sapply(counts, function(counts) all(sample.names %in% rownames(counts)))
-        if (!all(overlaps))
-            counts <- counts[-which(!overlaps)]
-        counts <- lapply(counts, function(counts) counts[sample.names,])
+        counts <- lapply(counts, as.matrix)
+        counts <- lapply(counts, function(counts) counts[match(sample.names, rownames(counts)),])
         names(counts) <- gsub(" ", "-", names(counts))
 
         list(samples=samples,
@@ -53,6 +51,7 @@ aries.info <- function(path) {
              cell.counts=counts)
     }, simplify=F)
 }
+
 
 
 

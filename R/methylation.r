@@ -20,7 +20,7 @@ aries.methylation <- function(selection, start=1, count=-1) {
         && 
         !all(c("samples","probe.names","control.matrix","cell.counts") %in% names(selection)))
         stop("'selection' was not created by aries.select()")
-
+    
     sample.names <- selection$samples$Sample_Name
     probe.names <- selection$probe.names
     if (start > length(probe.names) || start + count - 1 > length(probe.names))
@@ -32,7 +32,7 @@ aries.methylation <- function(selection, start=1, count=-1) {
     
     gds.filename <- file.path(selection$path, "betas", paste(selection$featureset, "gds", sep="."))
       
-    gds.file <- openfn.gds.safe(gds.filename)
+    gds.file <- openfn.gds(gds.filename)
     
     meth.sample.names <- read.gdsn(index.gdsn(gds.file, "col.names"))
     sample.idx <- match(sample.names, meth.sample.names)
