@@ -6,18 +6,17 @@
 \usage{
 aries.select(
   path,
-  featureset = "common",
+  featureset,
   time.point = NULL,
   sample.names = NULL,
-  probe.names = NULL,
   replicates = F
 )
 }
 \arguments{
 \item{path}{Base directory of ARIES.}
 
-\item{featureset}{Illumina BeadChip format (Default: 'common').
-Run \code{\link{aries.feature.sets}()} to get a list of valid identifiers.}
+\item{featureset}{Illumina BeadChip format.
+#' Run \code{\link{aries.feature.sets}()} to get a list of valid identifiers.  If all selected profiles are from the Illumina 450K (or EPIC) array, then the default is "450" (or "epic").  If there is a mix, then "common" is the default.}
 
 \item{time.point}{Optional. Restrict to profiles for samples collected at specific
 time points (Default: NULL).
@@ -25,8 +24,6 @@ Run \code{\link{aries.time.points}()} to get a list.}
 
 \item{sample.names}{Optional. Restrict to profiles for a set of samples (Default: NULL).
 Run \code{\link{aries.samples}()$Sample_Name} to get a list of sample identifiers.}
-
-\item{probe.names}{Optional. Restrict to a set of Illumina probe identifiers (Default: NULL).}
 
 \item{replicates}{Include replicate methylation profiles (Default: FALSE).
 Ignored if \code{is.null(sample.names)==FALSE}.}
