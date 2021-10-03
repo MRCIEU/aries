@@ -1,17 +1,29 @@
 # Test `aries`
 
+
+
 We start by loading the package
 and saving the directory containing the ARIES data.
+
 ```r
 library(aries)
-aries.dir <- "path/to/aries/"
+aries.dir <- "/projects/MRC-IEU/research/data/alspac/epigenetic/methylation/aries/dev/release_candidate/data/release" ## "path/to/aries"
 ```
 
 We will load ALSPAC data later as part of the test. 
 For this we will use the `alspac` R package.
+
 ```r
+## devtools::install_github("explodecomputer/alspac")
 library(alspac)
-alspac.dir <- "path/to/alspac"
+```
+
+```
+## [1] "The data directory ~/.gvfs/data/ has NOT been found. It is normally located on the remote R drive, R:/Data/. You will be able to search for variables from the dictionary but unable to extract them from the data. Please check that the R: drive has been mounted onto your computer through the UoB VPN. Run setDataDir(<directory name>) to try again."
+```
+
+```r
+alspac.dir <- "~/work/alspac/data" #"path/to/alspac"
 alspac::setDataDir(alspac.dir)
 ```
 
@@ -135,11 +147,36 @@ library(dnamalci)
 library(meffonym)
 ```
 
+```
+## loading models ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/knight/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/horvath/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/hannum/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/bohlin/model-min.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/bohlin/model-1se.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/epitoc/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/dunedinpoam38/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/brenner/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/epitoc2/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/lee/coefs-cpc.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/lee/coefs-rpc.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/lee/coefs-rrpc.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/levine/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/mayne/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/pedbe/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/skin/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/tl/coefs.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/zhang/coef-en.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/zhang/coef-blup.csv  ...
+## loading /projects/MRC-IEU/users/ms13525/work/R-epi-franklin/x86_64-redhat-linux-gnu-library/3.6/meffonym/miage/coefs.csv  ...
+## load horvath standard ...
+```
+
 ... add DNAm models for prenatal tobacco exposure,
 BMI, smoking, and sex ...
 
 ```r
-reese <- read.csv("ewas/pte-reese-ehp-2017.csv")
+reese <- read.csv("ewas/pte-reese-ehp-2017.csv",stringsAsFactors=F)
 meffonym.add.model("pte-reese-ehp-2017",
                    reese$cpg, reese$effect,
                    "reese-ehp-2017 model for prenatal smoking")
@@ -165,8 +202,15 @@ meffonym.add.model("sex-aries-15-unadj",
 ```r
 alcohol.sites <- names(dnamalci.get.model("dnamalc.144cpg")$coefficients)
 
-model.sites <- sapply(meffonym.models(), function(model)
-                      names(meffonym.get.model(model)$coefficients),
+model.names <- c(
+    "hannum",
+    "bmi-mendelson-plosmed-2017",
+    "bohlin.1se",
+    "smoking-joehanes-ccg-2016",
+    "pte-reese-ehp-2017",
+    "sex-aries-15-unadj")
+model.sites <- sapply(model.names, function(model)
+                      names(meffonym.get.model(model)$coefs),
                       simplify=F)
 
 ewas.sites <- lapply(ewas, function(ewas) ewas$cpg)
@@ -187,7 +231,42 @@ aries <- sapply(time.points, function(time.point) {
     ds$meth <- ds$meth[which(rownames(ds$meth) %in% sites),]
     ds
 }, simplify=F) ## 2 minutes
+```
 
+
+```r
+kable(sapply(aries, function(x) {
+    c(n=nrow(x$meth),
+      sapply(
+          c(model.sites, ewas.sites, list(alcohol=alcohol.sites)),
+          function(sites) {
+              floor(mean(sites %in% rownames(x$meth))*100)
+          }))
+    }))
+```
+
+
+
+|                                | FOM| antenatal| cord|  F7| 15up| FOF| c43m| c61m|  F9| F24|
+|:-------------------------------|---:|---------:|----:|---:|----:|---:|----:|----:|---:|---:|
+|n                               | 838|       838|  838| 838|  788| 838|  838|  838| 838| 787|
+|hannum                          | 100|       100|  100| 100|   91| 100|  100|  100| 100|  91|
+|bmi-mendelson-plosmed-2017      | 100|       100|  100| 100|   92| 100|  100|  100| 100|  92|
+|bohlin.1se                      | 100|       100|  100| 100|   91| 100|  100|  100| 100|  91|
+|smoking-joehanes-ccg-2016       | 100|       100|  100| 100|   90| 100|  100|  100| 100|  90|
+|pte-reese-ehp-2017              | 100|       100|  100| 100|   96| 100|  100|  100| 100|  96|
+|sex-aries-15-unadj              | 100|       100|  100| 100|   94| 100|  100|  100| 100|  94|
+|sex-aries-0-unadj               | 100|       100|  100| 100|   93| 100|  100|  100| 100|  93|
+|sex-aries-7-unadj               | 100|       100|  100| 100|   93| 100|  100|  100| 100|  93|
+|sex-aries-15-unadj              | 100|       100|  100| 100|   94| 100|  100|  100| 100|  94|
+|smoking-joehanes-ccg-2016       | 100|       100|  100| 100|   90| 100|  100|  100| 100|  90|
+|pte-joubert-ehp-2012-aries      | 100|       100|  100| 100|   93| 100|  100|  100| 100|  93|
+|birthweight-simpkin-hmg-2015    | 100|       100|  100| 100|  100| 100|  100|  100| 100| 100|
+|gestationalage-simpkin-hmg-2015 | 100|       100|  100| 100|   98| 100|  100|  100| 100|  97|
+|bmi-mendelson-plosmed-2017      | 100|       100|  100| 100|   92| 100|  100|  100| 100|  92|
+|alcohol                         | 100|       100|  100| 100|  100| 100|  100|  100| 100| 100|
+
+```r
 ## order aries time-point subsets by age for convenient outputs
 for (i in 1:length(aries))
     aries[[i]]$median.age <- round(median(aries[[i]]$samples$age, na.rm=T),1)
@@ -278,11 +357,12 @@ r.effects <- sapply(names(aries), function(time.point) {
         old.stats <- ewas[[ewasname]]
         old.stats <- old.stats[old.stats$cpg %in% rownames(ds$meth),]
         counts <- ds$cell.counts[["blood-gse35069-complete"]]
-        new.stats <- test.assocs(ds,
-                                 ds$samples[[varname]],
-                                 old.stats$cpg,
-                                 batch=ds$samples$plate,
-                                 counts=counts)
+        new.stats <- test.assocs(
+            ds,
+            ds$samples[[varname]],
+            old.stats$cpg,
+            batch=as.factor(ds$samples$plate),
+            counts=counts)
         cor(old.stats$effect, new.stats$effect, use="p")
     })
 })
@@ -300,11 +380,11 @@ kable(r.effects, digits=2)
 |sex-aries-0-unadj               | 1.00| 0.98|  0.97| 1.00| 0.99|  0.98| 0.97|          |     |     |
 |sex-aries-7-unadj               | 0.99| 0.98|  0.97| 1.00| 0.99|  0.98| 0.95|          |     |     |
 |sex-aries-15-unadj              | 0.99| 0.98|  0.97| 1.00| 0.99|  0.99| 0.97|          |     |     |
-|smoking-joehanes-ccg-2016       |     |     |      |     |     |  0.67| 0.85|      0.98| 0.98| 0.96|
-|pte-joubert-ehp-2012-aries      | 0.87| 0.60| -0.09| 0.58| 0.47|  0.57| 0.58|          |     |     |
-|birthweight-simpkin-hmg-2015    | 0.92| 0.19| -0.14| 0.51| 0.69| -0.19| 0.32|          |     |     |
-|gestationalage-simpkin-hmg-2015 | 0.87| 0.07|  0.12| 0.38| 0.29|  0.02| 0.00|          |     |     |
-|bmi-mendelson-plosmed-2017      |     |     |      | 0.31| 0.27|  0.77| 0.67|      0.60| 0.81| 0.73|
+|smoking-joehanes-ccg-2016       |     |     |      |     |     |  0.67| 0.89|      0.98| 0.98| 0.96|
+|pte-joubert-ehp-2012-aries      | 0.87| 0.60| -0.12| 0.58| 0.47|  0.56| 0.61|          |     |     |
+|birthweight-simpkin-hmg-2015    | 0.91| 0.19| -0.10| 0.52| 0.71| -0.22| 0.34|          |     |     |
+|gestationalage-simpkin-hmg-2015 | 0.87| 0.05|  0.13| 0.37| 0.33|  0.02| 0.16|          |     |     |
+|bmi-mendelson-plosmed-2017      |     |     |      | 0.31| 0.26|  0.77| 0.72|      0.60| 0.81| 0.72|
 
 As expected, correlation of:
 - sex effects is nearly perfect.
@@ -318,21 +398,32 @@ As expected, correlation of:
 
 
 ```r
-r.models <- sapply(names(aries), function(time.point) {
-    ds <- aries[[time.point]]
-    scores <- list(age=meffonym.score(ds$meth, "age.hannum")$score,
-                   bmi=meffonym.score(ds$meth, "bmi-mendelson-plosmed-2017")$score,
-                   gestationalage=meffonym.score(ds$meth, "ga.bohlin.1se")$score,                   
-                   cotinine=meffonym.score(ds$meth, "smoking-joehanes-ccg-2016")$score,
-                   alcohol=dnamalci(ds$meth, "dnamalc.144cpg")$score)
-    scores$audit <- scores$alcohol
-    sapply(names(scores), function(varname) {
-        if (varname %in% colnames(ds$samples))
-            cor(scores[[varname]], ds$samples[[varname]], use="p")
-        else
-            NA
+r.models <- sapply(
+    names(aries),
+    function(time.point) {
+        ds <- aries[[time.point]]
+        counts <- ds$cell.counts[["blood-gse35069-complete"]]
+        covs <- data.frame(batch=as.factor(ds$samples$plate),counts)
+        covs <- model.matrix(~., covs)
+        meth <- meffonym:::impute.mean(ds$meth)
+        fit <- lm.fit(x=covs, t(meth))
+        meth <- t(residuals(fit))
+        scores <- list(
+            age=meffonym.score(meth, "hannum")$score,
+            bmi=meffonym.score(meth, "bmi-mendelson-plosmed-2017")$score,
+            gestationalage=meffonym.score(meth, "bohlin.1se")$score,   
+            cotinine=meffonym.score(meth,"smoking-joehanes-ccg-2016")$score,
+            alcohol=dnamalci(meth, "dnamalc.144cpg")$score)
+        scores$audit <- scores$alcohol
+        sapply(
+            names(scores),
+            function(varname) {
+                if (varname %in% colnames(ds$samples))
+                    cor(scores[[varname]], ds$samples[[varname]], use="p")
+                else
+                    NA
+            })
     })
-})
 ```
 
 
@@ -342,14 +433,14 @@ kable(r.models, digits=2)
 
 
 
-|               | cord|  c43m| c61m|   F7|   F9|  15up|  F24| antenatal|  FOM|  FOF|
-|:--------------|----:|-----:|----:|----:|----:|-----:|----:|---------:|----:|----:|
-|age            |     |  0.11| 0.18| 0.05| 0.10|  0.13| 0.21|      0.67| 0.61| 0.72|
-|bmi            |     |      |     | 0.07| 0.10|  0.16| 0.24|      0.16| 0.30| 0.32|
-|gestationalage | 0.68| -0.10| 0.47| 0.04| 0.01| -0.01| 0.02|          |     |     |
-|cotinine       |     |      |     |     |     |  0.46| 0.46|      0.52|     |     |
-|alcohol        |     |      |     |     |     |      |     |          | 0.25| 0.18|
-|audit          |     |      |     |     |     |      |     |          | 0.37|     |
+|               | cord|  c43m|  c61m|   F7|   F9| 15up|  F24| antenatal|  FOM|  FOF|
+|:--------------|----:|-----:|-----:|----:|----:|----:|----:|---------:|----:|----:|
+|age            |     |  0.12| -0.04| 0.06| 0.09| 0.07| 0.09|      0.66| 0.51| 0.70|
+|bmi            |     |      |      | 0.09| 0.09| 0.21| 0.27|      0.18| 0.38| 0.34|
+|gestationalage | 0.62| -0.08|  0.29| 0.02| 0.04| 0.00| 0.04|          |     |     |
+|cotinine       |     |      |      |     |     | 0.47| 0.48|      0.53|     |     |
+|alcohol        |     |      |      |     |     |     |     |          | 0.26| 0.17|
+|audit          |     |      |      |     |     |     |     |          | 0.32|     |
 
 As expected, correlation of model scores with:
 - age increases with age (models were developed in adults) and is highest where there is greatest age variation.
@@ -367,11 +458,19 @@ library(pROC)
 
 r.auc <- sapply(names(aries), function(time.point) {
     ds <- aries[[time.point]]
-    scores <- list(pte=meffonym.score(ds$meth, "pte-reese-ehp-2017")$score,
-                   sex=meffonym.score(ds$meth, "sex-aries-15-unadj")$score,
-                   smoking=meffonym.score(ds$meth, "smoking-joehanes-ccg-2016")$score)
+    counts <- ds$cell.counts[["blood-gse35069-complete"]]
+    covs <- data.frame(batch=as.factor(ds$samples$plate),counts)
+    covs <- model.matrix(~., covs)
+    meth <- meffonym:::impute.mean(ds$meth)
+    fit <- lm.fit(x=covs, t(meth))
+    meth <- t(residuals(fit))
+    scores <- list(
+        pte=meffonym.score(meth, "pte-reese-ehp-2017")$score,
+        sex=meffonym.score(meth, "sex-aries-15-unadj")$score,
+        smoking=meffonym.score(meth, "smoking-joehanes-ccg-2016")$score)
     sapply(names(scores), function(varname) {
-        if (varname %in% colnames(ds$samples) && length(na.omit(unique(ds$samples[[varname]]))) > 1)
+        if (varname %in% colnames(ds$samples)
+            && length(na.omit(unique(ds$samples[[varname]]))) > 1)
             auc(ds$samples[[varname]], scores[[varname]])
         else
             NA
@@ -388,9 +487,9 @@ kable(r.auc, digits=2)
 
 |        | cord| c43m| c61m|   F7|   F9| 15up|  F24| antenatal|  FOM|  FOF|
 |:-------|----:|----:|----:|----:|----:|----:|----:|---------:|----:|----:|
-|pte     | 0.89| 0.87| 0.62| 0.85| 0.78| 0.82| 0.84|          |     |     |
-|sex     | 1.00| 1.00| 0.94| 1.00| 0.99| 1.00| 1.00|          |     |     |
-|smoking |     |     |     |     |     | 0.56| 0.70|      0.97| 0.92| 0.87|
+|pte     | 0.88| 0.82| 0.70| 0.83| 0.80| 0.82| 0.79|          |     |     |
+|sex     | 1.00| 0.86| 0.91| 0.93| 0.98| 0.99| 0.98|          |     |     |
+|smoking |     |     |     |     |     | 0.57| 0.67|      0.96| 0.92| 0.86|
 
 As expected, AUC for DNAm models of:
 - prenatal tobacco exposure was high (above 0.8) as published (PMID27323799).
@@ -409,17 +508,18 @@ cord.idx <- which(aries$all$samples$time_point == "cord")
 alspac.idx <- match(aries$all$samples$alnqlet[cord.idx], alspac$alnqlet)
 aries$all$samples$age[cord.idx] <- (alspac$gestational.age[alspac.idx]-40)/52
 
-aries$all$samples$age.hannum <- meffonym.score(aries$all$meth, "age.hannum")$score
+aries$all$samples$hannum <- meffonym.score(aries$all$meth, "hannum")$score
 idx <- which(!is.na(aries$all$samples$age))
 aries$all$samples$age.accel <- NA
-aries$all$samples$age.accel[idx] <- residuals(lm(age.hannum ~ .,
-                                          data=cbind(
-                                              aries$all$samples[idx,c("age.hannum","age","plate")],
-                                              aries$all$cell.counts[["blood-gse35069-complete"]][idx,])))
+aries$all$samples$age.accel[idx] <- residuals(
+    lm(hannum ~ .,
+       data=cbind(
+           aries$all$samples[idx,c("hannum","age","plate")],
+           aries$all$cell.counts[["blood-gse35069-complete"]][idx,])))
 ```
 
 Correlation of DNAm age estimates is quite high as expected
-across all of ARIES (R = 0.940349).
+across all of ARIES (R = 0.9393776).
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
 
@@ -443,7 +543,7 @@ dnam.aa.by.sex <- t(sapply(c("age 15","age 24","middle age"), function(gp) {
         if (length(unique(na.omit(sex))) < 2) return(rep(NA,4))
         fit <- lm(age.accel ~ sex)
         stats <- coef(summary(fit))[2,]
-        names(stats) <- c("difference","se","t-statistic","p.value")                
+        names(stats) <- c("difference","se","t-statistic","p.value")      
         stats
     })
 }))
@@ -458,9 +558,9 @@ kable(dnam.aa.by.sex,digits=2)
 
 |           | difference|   se| t-statistic| p.value|
 |:----------|----------:|----:|-----------:|-------:|
-|age 15     |       0.36| 0.15|        2.46|    0.01|
-|age 24     |       0.82| 0.35|        2.32|    0.02|
-|middle age |       1.62| 0.24|        6.87|    0.00|
+|age 15     |       0.39| 0.15|        2.65|    0.01|
+|age 24     |       0.62| 0.28|        2.23|    0.03|
+|middle age |       1.63| 0.23|        6.97|    0.00|
 (The 'middle age' group combines ALSPAC mothers and fathers
 at middle age, i.e. time points 'FOM' and 'FOF'). 
 

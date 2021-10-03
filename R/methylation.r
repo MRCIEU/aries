@@ -31,26 +31,6 @@ aries.methylation <- function(selection, start=1, count=-1) {
         probe.names <- probe.names[start:length(probe.names)]
     
     gds.filename <- file.path(selection$path, "betas", paste(selection$featureset, "gds", sep="."))
-      
-    gds.file <- openfn.gds(gds.filename)
-    
-    meth.sample.names <- read.gdsn(index.gdsn(gds.file, "col.names"))
-    sample.idx <- match(sample.names, meth.sample.names)
-    sample.idx <- min(sample.idx):max(sample.idx)
 
-    meth.probe.names <- read.gdsn(index.gdsn(gds.file, "row.names"))
-    probe.idx <- match(probe.names, meth.probe.names)
-    probe.idx <- min(probe.idx):max(probe.idx)
-    
-    matrix.node <- index.gdsn(gds.file, "matrix")
-    meth <- read.gdsn(matrix.node,
-                      start=c(probe.idx[1], sample.idx[1]),
-                      count=c(length(probe.idx), length(sample.idx)))
-    closefn.gds(gds.file)
-    
-    rownames(meth) <- meth.probe.names[probe.idx]
-    colnames(meth) <- meth.sample.names[sample.idx]
-
-    meth[match(probe.names, rownames(meth)),
-         match(sample.names, colnames(meth))]
+    retrieve.gds.matrix(gds.filename, probe.names, sample.names)
 }

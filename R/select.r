@@ -61,7 +61,11 @@ aries.select <- function(path, featureset, time.point=NULL, sample.names=NULL, r
         if (!replicates)
             is.selected.sample <- is.selected.sample & !aries$samples$duplicate.rm
         
-        cell.counts <- lapply(aries$cell.counts, function(counts) counts[which(is.selected.sample),])
+        cell.counts <- lapply(
+            aries$cell.counts,
+            function(counts) {
+                counts[which(is.selected.sample),]
+            })
         for (ref in names(cell.counts))
             if (all(is.na(cell.counts[[ref]])))
                 cell.counts[[ref]] <- NULL
@@ -78,11 +82,12 @@ aries.select <- function(path, featureset, time.point=NULL, sample.names=NULL, r
         featuresets <- setdiff(aries.feature.sets(path), "common")
         nsamples <- sapply(featuresets, function(featureset) {
             tryCatch({
-                selection <- aries.select0(path,
-                                           featureset,
-                                           time.point,
-                                           sample.names,
-                                           replicates)
+                selection <- aries.select0(
+                    path,
+                    featureset,
+                    time.point,
+                    sample.names,
+                    replicates)
                 nrow(selection$samples)
             }, error=function(e) {
                 0

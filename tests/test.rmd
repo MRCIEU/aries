@@ -119,6 +119,9 @@ BMI, smoking, and sex ...
 ```{r load-methylation}
 ```
 
+```{r site-coverage,results="asis"}
+``` 
+
 ... add ALSPAC exposure and phenotype variables to ARIES ...
 ```{r add-alspac-vars}
 ```
@@ -184,12 +187,12 @@ As expected, AUC for DNAm models of:
 ```
 
 Correlation of DNAm age estimates is quite high as expected
-across all of ARIES (R = `r with(aries$all$samples, cor(age.hannum, age, use="p"))`).
+across all of ARIES (R = `r with(aries$all$samples, cor(hannum, age, use="p"))`).
 
 ```{r,echo=F}
 print(ggplot(aries$all$samples,
              aes(x=age,
-                 y=age.hannum,
+                 y=hannum,
                  color=factor(time_point))) +
       geom_point())
 ```

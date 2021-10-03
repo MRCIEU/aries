@@ -1,11 +1,11 @@
 ## @knitr aries-init
 library(aries)
-aries.dir <- "path/to/aries"
+aries.dir <- "/projects/MRC-IEU/research/data/alspac/epigenetic/methylation/aries/dev/release_candidate/data/release" ## "path/to/aries"
 
 ## @knitr alspac-init
 ## devtools::install_github("explodecomputer/alspac")
 library(alspac)
-alspac.dir <- "path/to/alspac"
+alspac.dir <- "~/work/alspac/data" #"path/to/alspac"
 alspac::setDataDir(alspac.dir)
 
 ## @knitr check-aries.feature.sets
@@ -63,7 +63,7 @@ library(dnamalci)
 library(meffonym)
 
 ## @knitr add-models
-reese <- read.csv("ewas/pte-reese-ehp-2017.csv")
+reese <- read.csv("ewas/pte-reese-ehp-2017.csv",stringsAsFactors=F)
 meffonym.add.model("pte-reese-ehp-2017",
                    reese$cpg, reese$effect,
                    "reese-ehp-2017 model for prenatal smoking")
@@ -87,8 +87,15 @@ meffonym.add.model("sex-aries-15-unadj",
 ## @knitr collect-cpg-sites
 alcohol.sites <- names(dnamalci.get.model("dnamalc.144cpg")$coefficients)
 
-model.sites <- sapply(meffonym.models(), function(model)
-                      names(meffonym.get.model(model)$coefficients),
+model.names <- c(
+    "hannum",
+    "bmi-mendelson-plosmed-2017",
+    "bohlin.1se",
+    "smoking-joehanes-ccg-2016",
+    "pte-reese-ehp-2017",
+    "sex-aries-15-unadj")
+model.sites <- sapply(model.names, function(model)
+                      names(meffonym.get.model(model)$coefs),
                       simplify=F)
 
 ewas.sites <- lapply(ewas, function(ewas) ewas$cpg)
@@ -107,6 +114,17 @@ aries <- sapply(time.points, function(time.point) {
     ds$meth <- ds$meth[which(rownames(ds$meth) %in% sites),]
     ds
 }, simplify=F) ## 2 minutes
+
+## @knitr site-coverage
+kable(sapply(aries, function(x) {
+    c(n=nrow(x$meth),
+      sapply(
+          c(model.sites, ewas.sites, list(alcohol=alcohol.sites)),
+          function(sites) {
+              floor(mean(sites %in% rownames(x$meth))*100)
+          }))
+    }))
+
 
 ## order aries time-point subsets by age for convenient outputs
 for (i in 1:length(aries))
@@ -189,33 +207,44 @@ r.effects <- sapply(names(aries), function(time.point) {
         old.stats <- ewas[[ewasname]]
         old.stats <- old.stats[old.stats$cpg %in% rownames(ds$meth),]
         counts <- ds$cell.counts[["blood-gse35069-complete"]]
-        new.stats <- test.assocs(ds,
-                                 ds$samples[[varname]],
-                                 old.stats$cpg,
-                                 batch=ds$samples$plate,
-                                 counts=counts)
+        new.stats <- test.assocs(
+            ds,
+            ds$samples[[varname]],
+            old.stats$cpg,
+            batch=as.factor(ds$samples$plate),
+            counts=counts)
         cor(old.stats$effect, new.stats$effect, use="p")
     })
 })
 
 
 ## @knitr test-model-correlations
-
-r.models <- sapply(names(aries), function(time.point) {
-    ds <- aries[[time.point]]
-    scores <- list(age=meffonym.score(ds$meth, "age.hannum")$score,
-                   bmi=meffonym.score(ds$meth, "bmi-mendelson-plosmed-2017")$score,
-                   gestationalage=meffonym.score(ds$meth, "ga.bohlin.1se")$score,                   
-                   cotinine=meffonym.score(ds$meth, "smoking-joehanes-ccg-2016")$score,
-                   alcohol=dnamalci(ds$meth, "dnamalc.144cpg")$score)
-    scores$audit <- scores$alcohol
-    sapply(names(scores), function(varname) {
-        if (varname %in% colnames(ds$samples))
-            cor(scores[[varname]], ds$samples[[varname]], use="p")
-        else
-            NA
+r.models <- sapply(
+    names(aries),
+    function(time.point) {
+        ds <- aries[[time.point]]
+        counts <- ds$cell.counts[["blood-gse35069-complete"]]
+        covs <- data.frame(batch=as.factor(ds$samples$plate),counts)
+        covs <- model.matrix(~., covs)
+        meth <- meffonym:::impute.mean(ds$meth)
+        fit <- lm.fit(x=covs, t(meth))
+        meth <- t(residuals(fit))
+        scores <- list(
+            age=meffonym.score(meth, "hannum")$score,
+            bmi=meffonym.score(meth, "bmi-mendelson-plosmed-2017")$score,
+            gestationalage=meffonym.score(meth, "bohlin.1se")$score,   
+            cotinine=meffonym.score(meth,"smoking-joehanes-ccg-2016")$score,
+            alcohol=dnamalci(meth, "dnamalc.144cpg")$score)
+        scores$audit <- scores$alcohol
+        sapply(
+            names(scores),
+            function(varname) {
+                if (varname %in% colnames(ds$samples))
+                    cor(scores[[varname]], ds$samples[[varname]], use="p")
+                else
+                    NA
+            })
     })
-})
 
 
 ## @knitr test-model-auc
@@ -224,11 +253,19 @@ library(pROC)
 
 r.auc <- sapply(names(aries), function(time.point) {
     ds <- aries[[time.point]]
-    scores <- list(pte=meffonym.score(ds$meth, "pte-reese-ehp-2017")$score,
-                   sex=meffonym.score(ds$meth, "sex-aries-15-unadj")$score,
-                   smoking=meffonym.score(ds$meth, "smoking-joehanes-ccg-2016")$score)
+    counts <- ds$cell.counts[["blood-gse35069-complete"]]
+    covs <- data.frame(batch=as.factor(ds$samples$plate),counts)
+    covs <- model.matrix(~., covs)
+    meth <- meffonym:::impute.mean(ds$meth)
+    fit <- lm.fit(x=covs, t(meth))
+    meth <- t(residuals(fit))
+    scores <- list(
+        pte=meffonym.score(meth, "pte-reese-ehp-2017")$score,
+        sex=meffonym.score(meth, "sex-aries-15-unadj")$score,
+        smoking=meffonym.score(meth, "smoking-joehanes-ccg-2016")$score)
     sapply(names(scores), function(varname) {
-        if (varname %in% colnames(ds$samples) && length(na.omit(unique(ds$samples[[varname]]))) > 1)
+        if (varname %in% colnames(ds$samples)
+            && length(na.omit(unique(ds$samples[[varname]]))) > 1)
             auc(ds$samples[[varname]], scores[[varname]])
         else
             NA
@@ -246,24 +283,27 @@ cord.idx <- which(aries$all$samples$time_point == "cord")
 alspac.idx <- match(aries$all$samples$alnqlet[cord.idx], alspac$alnqlet)
 aries$all$samples$age[cord.idx] <- (alspac$gestational.age[alspac.idx]-40)/52
 
-aries$all$samples$age.hannum <- meffonym.score(aries$all$meth, "age.hannum")$score
+aries$all$samples$hannum <- meffonym.score(aries$all$meth, "hannum")$score
 idx <- which(!is.na(aries$all$samples$age))
 aries$all$samples$age.accel <- NA
-aries$all$samples$age.accel[idx] <- residuals(lm(age.hannum ~ .,
-                                          data=cbind(
-                                              aries$all$samples[idx,c("age.hannum","age","plate")],
-                                              aries$all$cell.counts[["blood-gse35069-complete"]][idx,])))
+aries$all$samples$age.accel[idx] <- residuals(
+    lm(hannum ~ .,
+       data=cbind(
+           aries$all$samples[idx,c("hannum","age","plate")],
+           aries$all$cell.counts[["blood-gse35069-complete"]][idx,])))
 
 ## @knitr dnam-age-correlations
 time.points <- setdiff(names(aries), "all")
-dnam.age.r <- cbind("time point"=time.points,
-                    "median age"=sapply(aries[time.points], function(ds) ds$median.age),
-                    R=sapply(time.points, function(tp) {
-                        with(aries$all$samples, {
-                            idx <- which(time_point == tp)
-                            cor(age[idx], age.hannum[idx], use="p")
-                        })
-                    }))
+dnam.age.r <- cbind(
+    "time point"=time.points,
+    "median age"=sapply(aries[time.points],
+        function(ds) ds$median.age),
+    R=sapply(time.points, function(tp) {
+        with(aries$all$samples, {
+            idx <- which(time_point == tp)
+            cor(age[idx], hannum[idx], use="p")
+        })
+    }))
 
 
 ## @knitr dnam-aa-by-sex
@@ -281,7 +321,7 @@ dnam.aa.by.sex <- t(sapply(c("age 15","age 24","middle age"), function(gp) {
         if (length(unique(na.omit(sex))) < 2) return(rep(NA,4))
         fit <- lm(age.accel ~ sex)
         stats <- coef(summary(fit))[2,]
-        names(stats) <- c("difference","se","t-statistic","p.value")                
+        names(stats) <- c("difference","se","t-statistic","p.value")      
         stats
     })
 }))

@@ -27,11 +27,9 @@ aries.info <- function(path) {
     names(gds.filenames) <- sub(".gds$", "", basename(gds.filenames))
     sapply(names(gds.filenames), function(featureset) {
         gds.filename <- gds.filenames[[featureset]]
-        gds.file <- openfn.gds.safe(gds.filename)
-        on.exit(closefn.gds(gds.file))
-        probe.names <- read.gdsn(index.gdsn(gds.file, "row.names"))
-        sample.names <- read.gdsn(index.gdsn(gds.file, "col.names"))
-
+        ids <- retrieve.gds.dims(gds.filename)
+        probe.names <- ids[[1]]
+        sample.names <- ids[[2]]        
         samples <- samples[match(sample.names, samples$Sample_Name),]
         
         control.matrix <- read.table(file.path(path, "control_matrix", paste(featureset, "txt", sep=".")),
