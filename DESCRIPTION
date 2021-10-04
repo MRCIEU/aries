@@ -6,7 +6,7 @@ Authors@R: c(person("Matthew", "Suderman", role = c("cre", "aut"),
                     email = "matthew.suderman@bristol.ac.uk"))
 Author: Matthew Suderman <matthew.suderman@bristol.ac.uk> [cre, aut]
 Maintainer: Matthew Suderman <matthew.suderman@bristol.ac.uk>
-Depends: gdsfmt
+Depends: R (>= 3.5.0), gdsfmt
 License: Artistic-2.0
 URL: https://github.com/MRCIEU/aries
 LazyData: yes
