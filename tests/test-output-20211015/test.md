@@ -7,7 +7,6 @@ and saving the directory containing the ARIES data.
 
 ```r
 library(aries)
-aries.dir <- "/projects/MRC-IEU/research/data/alspac/epigenetic/methylation/aries/dev/release_candidate/data/release" ## "path/to/aries"
 ```
 
 We will load ALSPAC data later as part of the test. 
@@ -23,7 +22,6 @@ library(alspac)
 ```
 
 ```r
-alspac.dir <- "~/work/alspac/data" #"path/to/alspac"
 alspac::setDataDir(alspac.dir)
 ```
 
@@ -225,12 +223,33 @@ sites <- unique(c(unlist(ewas.sites),
 ```r
 time.points <- aries.time.points(aries.dir)
 aries <- sapply(time.points, function(time.point) {
+    cat(date(), "loading methylation for", time.point, "\n")
     ds <- aries.select(aries.dir,
                        time.point=time.point)
-    ds$meth <- aries.methylation(ds)
-    ds$meth <- ds$meth[which(rownames(ds$meth) %in% sites),]
+    ds$meth <- aries.methylation(ds, probe.names=sites)
     ds
 }, simplify=F) ## 2 minutes
+```
+
+```
+## Fri Oct 15 15:05:45 2021 loading methylation for FOM 
+## Fri Oct 15 15:05:50 2021 loading methylation for antenatal 
+## Fri Oct 15 15:05:55 2021 loading methylation for cord 
+## Fri Oct 15 15:06:00 2021 loading methylation for F7 
+## Fri Oct 15 15:06:05 2021 loading methylation for 15up 
+## Fri Oct 15 15:06:15 2021 loading methylation for FOF 
+## Fri Oct 15 15:06:19 2021 loading methylation for c43m 
+## Fri Oct 15 15:06:22 2021 loading methylation for c61m 
+## Fri Oct 15 15:06:24 2021 loading methylation for F9 
+## Fri Oct 15 15:06:28 2021 loading methylation for F24
+```
+
+```r
+cat(date(), "finished loading methylation\n")
+```
+
+```
+## Fri Oct 15 15:07:18 2021 finished loading methylation
 ```
 
 
@@ -380,11 +399,11 @@ kable(r.effects, digits=2)
 |sex-aries-0-unadj               | 1.00| 0.98|  0.97| 1.00| 0.99|  0.98| 0.97|          |     |     |
 |sex-aries-7-unadj               | 0.99| 0.98|  0.97| 1.00| 0.99|  0.98| 0.95|          |     |     |
 |sex-aries-15-unadj              | 0.99| 0.98|  0.97| 1.00| 0.99|  0.99| 0.97|          |     |     |
-|smoking-joehanes-ccg-2016       |     |     |      |     |     |  0.67| 0.89|      0.98| 0.98| 0.96|
-|pte-joubert-ehp-2012-aries      | 0.87| 0.60| -0.12| 0.58| 0.47|  0.56| 0.61|          |     |     |
-|birthweight-simpkin-hmg-2015    | 0.91| 0.19| -0.10| 0.52| 0.71| -0.22| 0.34|          |     |     |
-|gestationalage-simpkin-hmg-2015 | 0.87| 0.05|  0.13| 0.37| 0.33|  0.02| 0.16|          |     |     |
-|bmi-mendelson-plosmed-2017      |     |     |      | 0.31| 0.26|  0.77| 0.72|      0.60| 0.81| 0.72|
+|smoking-joehanes-ccg-2016       |     |     |      |     |     |  0.67| 0.90|      0.98| 0.98| 0.96|
+|pte-joubert-ehp-2012-aries      | 0.87| 0.60| -0.12| 0.58| 0.47|  0.56| 0.62|          |     |     |
+|birthweight-simpkin-hmg-2015    | 0.91| 0.19| -0.10| 0.52| 0.71| -0.22| 0.35|          |     |     |
+|gestationalage-simpkin-hmg-2015 | 0.87| 0.05|  0.13| 0.37| 0.33|  0.02| 0.21|          |     |     |
+|bmi-mendelson-plosmed-2017      |     |     |      | 0.31| 0.26|  0.77| 0.73|      0.60| 0.81| 0.72|
 
 As expected, correlation of:
 - sex effects is nearly perfect.
@@ -435,10 +454,10 @@ kable(r.models, digits=2)
 
 |               | cord|  c43m|  c61m|   F7|   F9| 15up|  F24| antenatal|  FOM|  FOF|
 |:--------------|----:|-----:|-----:|----:|----:|----:|----:|---------:|----:|----:|
-|age            |     |  0.12| -0.04| 0.06| 0.09| 0.07| 0.09|      0.66| 0.51| 0.70|
-|bmi            |     |      |      | 0.09| 0.09| 0.21| 0.27|      0.18| 0.38| 0.34|
+|age            |     |  0.12| -0.04| 0.06| 0.09| 0.07| 0.10|      0.66| 0.51| 0.70|
+|bmi            |     |      |      | 0.09| 0.09| 0.21| 0.30|      0.18| 0.38| 0.34|
 |gestationalage | 0.62| -0.08|  0.29| 0.02| 0.04| 0.00| 0.04|          |     |     |
-|cotinine       |     |      |      |     |     | 0.47| 0.48|      0.53|     |     |
+|cotinine       |     |      |      |     |     | 0.47| 0.46|      0.53|     |     |
 |alcohol        |     |      |      |     |     |     |     |          | 0.26| 0.17|
 |audit          |     |      |      |     |     |     |     |          | 0.32|     |
 
@@ -487,9 +506,9 @@ kable(r.auc, digits=2)
 
 |        | cord| c43m| c61m|   F7|   F9| 15up|  F24| antenatal|  FOM|  FOF|
 |:-------|----:|----:|----:|----:|----:|----:|----:|---------:|----:|----:|
-|pte     | 0.88| 0.82| 0.70| 0.83| 0.80| 0.82| 0.79|          |     |     |
-|sex     | 1.00| 0.86| 0.91| 0.93| 0.98| 0.99| 0.98|          |     |     |
-|smoking |     |     |     |     |     | 0.57| 0.67|      0.96| 0.92| 0.86|
+|pte     | 0.88| 0.82| 0.70| 0.83| 0.80| 0.82| 0.82|          |     |     |
+|sex     | 1.00| 0.86| 0.91| 0.93| 0.98| 0.99| 1.00|          |     |     |
+|smoking |     |     |     |     |     | 0.57| 0.69|      0.96| 0.92| 0.86|
 
 As expected, AUC for DNAm models of:
 - prenatal tobacco exposure was high (above 0.8) as published (PMID27323799).

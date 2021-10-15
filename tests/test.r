@@ -1,11 +1,9 @@
 ## @knitr aries-init
 library(aries)
-aries.dir <- "/projects/MRC-IEU/research/data/alspac/epigenetic/methylation/aries/dev/release_candidate/data/release" ## "path/to/aries"
 
 ## @knitr alspac-init
 ## devtools::install_github("explodecomputer/alspac")
 library(alspac)
-alspac.dir <- "~/work/alspac/data" #"path/to/alspac"
 alspac::setDataDir(alspac.dir)
 
 ## @knitr check-aries.feature.sets
@@ -108,12 +106,13 @@ sites <- unique(c(unlist(ewas.sites),
 ## @knitr load-methylation
 time.points <- aries.time.points(aries.dir)
 aries <- sapply(time.points, function(time.point) {
+    cat(date(), "loading methylation for", time.point, "\n")
     ds <- aries.select(aries.dir,
                        time.point=time.point)
-    ds$meth <- aries.methylation(ds)
-    ds$meth <- ds$meth[which(rownames(ds$meth) %in% sites),]
+    ds$meth <- aries.methylation(ds, probe.names=sites)
     ds
-}, simplify=F) ## 2 minutes
+}, simplify=F) ## 45s
+cat(date(), "finished loading methylation\n")
 
 ## @knitr site-coverage
 kable(sapply(aries, function(x) {

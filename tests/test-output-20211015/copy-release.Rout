@@ -1,0 +1,40 @@
+> source("test-copy-release-example.r")
+Fri Oct 15 12:26:52 2021 Saving 450 betas
+Fri Oct 15 12:55:32 2021 Saving 450 detection p-values
+Fri Oct 15 13:36:42 2021 Saving 450 samplesheet
+Fri Oct 15 13:36:42 2021 Saving 450 control matrix
+Fri Oct 15 13:36:45 2021 Saving common betas
+Fri Oct 15 14:18:09 2021 Saving common detection p-values
+Fri Oct 15 15:00:17 2021 Saving common samplesheet
+Fri Oct 15 15:00:17 2021 Saving common control matrix
+Fri Oct 15 15:00:18 2021 Saving andrews-and-bakulski-cord-blood cell count estimates
+Fri Oct 15 15:00:18 2021 Saving blood-gse35069-complete cell count estimates
+Fri Oct 15 15:00:18 2021 Saving blood-gse35069 cell count estimates
+Fri Oct 15 15:00:18 2021 Saving combined-cord-blood cell count estimates
+Fri Oct 15 15:00:18 2021 Saving cord-blood-gse68456 cell count estimates
+Fri Oct 15 15:00:18 2021 Saving gervin-and-lyle-cord-blood cell count estimates
+Fri Oct 15 15:00:21 2021 Saving epic betas
+Fri Oct 15 15:23:23 2021 Saving epic detection p-values
+Fri Oct 15 15:48:48 2021 Saving epic samplesheet
+Fri Oct 15 15:48:48 2021 Saving epic control matrix
+featureset =  common 
+identical meth =  TRUE 
+identical control.matrix =  TRUE 
+identical  blood-gse35069-complete  =  TRUE 
+identical  blood-gse35069  =  TRUE 
+identical samples =  TRUE 
+identical probe.names =  TRUE 
+featureset =  450 
+identical meth =  TRUE 
+identical control.matrix =  TRUE 
+identical  blood-gse35069-complete  =  TRUE 
+identical  blood-gse35069  =  TRUE 
+identical samples =  TRUE 
+identical probe.names =  TRUE 
+featureset =  epic 
+identical meth =  TRUE 
+identical control.matrix =  TRUE 
+identical  blood-gse35069-complete  =  TRUE 
+identical  blood-gse35069  =  TRUE 
+identical samples =  TRUE 
+identical probe.names =  TRUE 

@@ -9,5 +9,7 @@ aries.samples <- function(path) {
     samplesheet.filename <- file.path(path, "samplesheet", "samplesheet.csv")
     if (!file.exists(samplesheet.filename))
         stop("Invalid path for ARIES data: ", path)
-    read.csv(samplesheet.filename, stringsAsFactors=F)
+    ret <- read.csv(samplesheet.filename, stringsAsFactors=F)
+    rownames(ret) <- ret$Sample_Name
+    ret
 }

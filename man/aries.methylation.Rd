@@ -4,7 +4,7 @@
 \alias{aries.methylation}
 \title{aries.methylation}
 \usage{
-aries.methylation(selection, start = 1, count = -1)
+aries.methylation(selection, start = 1, count = -1, probe.names = NULL)
 }
 \arguments{
 \item{selection}{Output of \code{\link{aries.select}()}.}
@@ -14,10 +14,15 @@ Indexing is with respect to \code{selection$probe.names}.}
 
 \item{count}{Number of CpG sites to load (Default: -1).
 A value of \code{-1} indicates all available.}
+
+\item{probe.names}{Names of CpG sites to load (Default: NULL).
+If not NULL, then `start/count` are ignored and
+methylation levels are loaded for the specified CpG sites.}
 }
 \value{
 A matrix filled with methylation estimates from
-0 to 1 (rows=CpG sites, columns=samples).
+0 to 1 (rows=CpG sites, columns=samples) corresponding to
+the requested CpG sites.
 }
 \description{
 Load DNA methylation profiles for a specified ARIES subset
@@ -27,5 +32,6 @@ Load DNA methylation profiles for a specified ARIES subset
 ## Load the first 1000 CpG sites for all blood samples collected around age 15
 aries <- aries.select(aries.dir, featureset="common", time.point="15up")
 aries$meth <- aries.methylation(aries, start=1, count=1000)
+aries$meth <- aries.methylation(aries, probe.names=c("cg19642007", "cg12038298", "cg09884480", "cg1291275"))
 }
 }
