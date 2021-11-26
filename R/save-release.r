@@ -211,7 +211,7 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
             info[[name]]$samples,
             Sample_Name[!alnqlet %in% as.character(remove.ids)])
         aries <- aries.select(
-            aries.dir,
+            release.path,
             featureset=name,
             sample.names=sample.names)
 
