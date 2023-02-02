@@ -49,5 +49,28 @@ for blood samples collected around age 15.
          aries$meth <- aries.methylation(aries)
 
 A more complete example including a basic EWAS
-is also [available](http://htmlpreview.github.io/?https://github.com/MRCIEU/aries/blob/master/docs/tutorial/tutorial.html).
+is also [available](https://mrcieu.github.io/aries/tutorial/tutorial.html).
+
+## ARIES by number
+
+|          | Illumina 450k| Illumina EPIC | Description |
+|:---------|----:|----:|:----|
+|cord      |  914|    0| Study child cord blood |
+|c43m      |   85|    0| Study child age 3.5y |
+|c61m      |   34|    0| Study child age 5y |
+|F7        |  978|    0| Study child age 7y |
+|F9        |  374|    0| Study child age 9y |
+|15up      |  981| 1920| Study child age 15-17y |
+|F24       |    0|  828| Study child age 24y |
+|antenatal |  987|    0| Mothers during the study child pregnancy |
+|FOM       |  992|    0| Mothers approximately 18 years after study pregnancy |
+|FOF       |  588|    0| Fathers approximately 18 years after study pregnancy |
+
+These numbers can be obtained from the data using following code:
+
+         library(aries)
+         aries.dir <- "path/to/aries"
+         info <- aries.info(path="")
+         with(info$common$samples, table(time_point,chip))
+
 
