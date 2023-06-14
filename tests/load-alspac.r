@@ -1,6 +1,5 @@
 varnames <- c(
     ## misc
-    "MONTHS", # maternal age at birth
     "c755", ## maternal occupation
     "b032", ## parity
     "c645a", ## maternal education
@@ -119,7 +118,7 @@ variable.index <- alspac::filterVars(variable.index,
     c804=c(cat1="Current"),
     kz030=c(cat1="Current"),
     t5510=c(cat1="Current"),
-    bestgest=c(obj="^bestgest"))
+    bestgest=c(obj="^mz"))
 
 stopifnot(
     length(setdiff(tolower(varnames),
