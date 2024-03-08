@@ -73,4 +73,9 @@ These numbers can be obtained from the data using following code:
          info <- aries.info(path="")
          with(info$common$samples, table(time_point,chip))
 
+## Cell count estimates
+
+Blood cell counts were estimated using published DNA methylation references using the meffil R package: 
+
+https://github.com/perishky/meffil/wiki/Estimating-cellular-composition
 
