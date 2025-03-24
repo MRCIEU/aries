@@ -51,6 +51,12 @@ for blood samples collected around age 15.
 A more complete example including a basic EWAS
 is also [available](https://mrcieu.github.io/aries/tutorial/tutorial.html).
 
+Note that, by default, DNA methylation data will have all
+probe intensities with detection p-values > 0.01 will appear as missing values (i.e. NA).
+To include these values, set `no.missing` to `TRUE`, e.g. 
+
+          aries$meth <- aries.methylation(aries,no.missing=T)
+
 ## ARIES by number
 
 |          | Illumina 450k| Illumina EPIC | Description |

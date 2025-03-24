@@ -36,8 +36,8 @@ aries.save.release <- function(release.path, samplesheet,
     for (reference in names(cell.counts))
         stopifnot(all(rownames(cell.counts[[reference]])
                       %in% samplesheet$Sample_Name))
-    stopifnot(identical(list.files(betas.path), list.files(detp.path)))
-    for (filename in list.files(betas.path, full.names=T)) {
+    stopifnot(identical(list.files(betas.path, pattern=".gds$"), list.files(detp.path)))
+    for (filename in list.files(betas.path, pattern=".gds$", full.names=T)) {
         name <- sub("\\.[^.]+$", "", basename(filename))
         stopifnot(identical(retrieve.gds.dims(filename)[[2]],
                             names(qc.objects[[name]])))
@@ -164,8 +164,16 @@ aries.save.release <- function(release.path, samplesheet,
         if (not.file.exists(gds.filename)) 
             R.utils::copyFile(file.path(betas.path, basename(gds.filename)), save.path)
     } 
+    save.path <- file.path(release.path, "betas", "no-missing")
+    if (file.exists(file.path(betas.path, "no-missing"))) {
+        dir.create(save.path)
+        for (name in names(samplesheets)) {
+            gds.filename <- file.path(save.path, paste0(name, ".gds"))
+            if (not.file.exists(gds.filename)) 
+                R.utils::copyFile(file.path(betas.path, "no-missing", basename(gds.filename)), save.path)
+        }
+    }
     
-
     ## save detection p-values
     cat(date(), "Saving detection p-values\n")
     save.path <- file.path(release.path, "detection_p_values")
@@ -216,13 +224,17 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
             sample.names=sample.names)
 
         gds.filename <- paste(name, "gds", sep=".")
-
         cat(date(), "Saving", name, "betas\n") 
         copy.gds.matrix(
             file.path(release.path, "betas", gds.filename),
             file.path(new.path, "betas", gds.filename),
             sample.names=sample.names)
-
+        if (file.exists(file.path(release.path, "betas", "no-missing")))
+            copy.gds.matrix(
+                file.path(release.path, "betas", "no-missing", gds.filename),
+                file.path(new.path, "betas", "no-missing", gds.filename),
+                sample.names=sample.names)
+        
         cat(date(), "Saving", name, "detection p-values\n") 
         copy.gds.matrix(
             file.path(release.path, "detection_p_values", gds.filename),

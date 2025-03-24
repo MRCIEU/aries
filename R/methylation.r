@@ -10,6 +10,8 @@
 #' @param probe.names Names of CpG sites to load (Default: NULL).
 #' If not NULL, then `start/count` are ignored and
 #' methylation levels are loaded for the specified CpG sites.
+#' @param no.missing If TRUE, then load DNA methylation from a
+#' file without undetected probe values missing (Default: FALSE).
 #' @return A matrix filled with methylation estimates from
 #' 0 to 1 (rows=CpG sites, columns=samples) corresponding to
 #' the requested CpG sites.
@@ -20,7 +22,7 @@
 #' aries$meth <- aries.methylation(aries, probe.names=c("cg19642007", "cg12038298", "cg09884480", "cg1291275"))
 #' }
 #' @export
-aries.methylation <- function(selection, start=1, count=-1, probe.names=NULL) {
+aries.methylation <- function(selection, start=1, count=-1, probe.names=NULL, no.missing=FALSE) {
     if (!is.list(selection)
         && 
         !all(c("samples","probe.names","control.matrix","cell.counts") %in% names(selection)))
@@ -46,7 +48,10 @@ aries.methylation <- function(selection, start=1, count=-1, probe.names=NULL) {
             probe.names <- common.names     
     }
     
-    gds.filename <- file.path(selection$path, "betas", paste(selection$featureset, "gds", sep="."))
+    gds.filename <- file.path(
+        selection$path,
+        ifelse(!no.missing, "betas", file.path("betas","no-missing")),
+        paste(selection$featureset, "gds", sep="."))
 
     retrieve.gds.matrix(gds.filename, probe.names, sample.names)
 }

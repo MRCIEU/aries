@@ -1,5 +1,5 @@
 Package: aries
-Version: 0.0.1
+Version: 0.0.2
 Title: Accessible Resource for Integrated Epigenomic Studies (ARIES)
 Description: Functions for loading the ARIES DNA methylation profiles
 Authors@R: c(person("Matthew", "Suderman", role = c("cre", "aut"),
@@ -11,4 +11,4 @@ License: Artistic-2.0
 URL: https://github.com/MRCIEU/aries
 LazyData: yes
 biocViews: DNAMethylation, Microarray
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.3

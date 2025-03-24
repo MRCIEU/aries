@@ -4,7 +4,13 @@
 \alias{aries.methylation}
 \title{aries.methylation}
 \usage{
-aries.methylation(selection, start = 1, count = -1, probe.names = NULL)
+aries.methylation(
+  selection,
+  start = 1,
+  count = -1,
+  probe.names = NULL,
+  no.missing = FALSE
+)
 }
 \arguments{
 \item{selection}{Output of \code{\link{aries.select}()}.}
@@ -18,6 +24,9 @@ A value of \code{-1} indicates all available.}
 \item{probe.names}{Names of CpG sites to load (Default: NULL).
 If not NULL, then `start/count` are ignored and
 methylation levels are loaded for the specified CpG sites.}
+
+\item{no.missing}{If TRUE, then load DNA methylation from a
+file without undetected probe values missing (Default: FALSE).}
 }
 \value{
 A matrix filled with methylation estimates from
