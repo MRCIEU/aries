@@ -205,8 +205,9 @@ read.mendelson <- function(filename) {
     ret <- read_xlsx(filename, skip=2)
     ret <- as.data.frame(ret)
     cols <- colnames(ret)
+    cols <- gsub("[^ -~]+","",cols)
     names(cols) <- cols
-    cols[c("Probename","β...9","p-value...11")] <- c("cpg","effect","p.value")
+    cols[c("Probename","...9","p-value...11")] <- c("cpg","effect","p.value")
     colnames(ret) <- cols
     ret
 }

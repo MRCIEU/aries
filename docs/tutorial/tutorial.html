@@ -441,8 +441,9 @@ Approach. PLoS Med. 2017;14(1):e1002215.</p>
     ret &lt;- read_xlsx(filename, skip=2)
     ret &lt;- as.data.frame(ret)
     cols &lt;- colnames(ret)
+    cols &lt;- gsub(&quot;[^ -~]+&quot;,&quot;&quot;,cols)
     names(cols) &lt;- cols
-    cols[c(&quot;Probename&quot;,&quot;β...9&quot;,&quot;p-value...11&quot;)] &lt;- c(&quot;cpg&quot;,&quot;effect&quot;,&quot;p.value&quot;)
+    cols[c(&quot;Probename&quot;,&quot;...9&quot;,&quot;p-value...11&quot;)] &lt;- c(&quot;cpg&quot;,&quot;effect&quot;,&quot;p.value&quot;)
     colnames(ret) &lt;- cols
     ret
 }
