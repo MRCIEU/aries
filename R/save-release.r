@@ -204,10 +204,11 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
     directories <- directories[!grepl("norm_objects", directories)]
     for (dir in directories)
         dir.create(file.path(new.path, dir), recursive=T)
+    dir.create(reports.path <- file.path(new.path, "derived", "reports"))
     
     samplesheet <- aries.samples(release.path)
-    samplesheet <- samplesheet[!samplesheet$alnqlet
-                               %in% as.character(remove.ids),]
+    is.included <- !samplesheet$alnqlet %in% as.character(remove.ids)
+    samplesheet <- samplesheet[is.included,]
     write.csv(
         samplesheet, 
         file=file.path(new.path, "samplesheet", "samplesheet.csv"),
@@ -264,8 +265,43 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
                     sep="\t", quote=F,row.names=F,col.names=T)
             }
         }
-    }
 
+        cat(date(), "Generating QC report\n")
+        qc.objects <- readRDS(file.path(release.path, "qc_objects", paste0(name,".rds")))
+        qc.parameters <- meffil.qc.parameters(
+          beadnum.samples.threshold             = 0.1,  ## remove samples with >10% probes with bead count < 3
+          detectionp.samples.threshold          = 0.1,  ## remove samples with >10% probes with detection p > 0.01 
+          detectionp.cpgs.threshold             = 0.1,  ## remove cpgs with ...
+          beadnum.cpgs.threshold                = 0.1,  ## remove cpgs with ...
+          sex.outlier.sd                        = 5,    ## flag pred sex score outliers (>5 SDs)
+          snp.concordance.threshold             = 0.95, ## flag snp probes with below 95% concordance genotypes
+          sample.genotype.concordance.threshold = 0.8)  ## flag samples with <80% snp concordance with genotypes
+        report.filename <- file.path(reports.path, "qc", paste0("qc-report-",name, ".html"))
+        in.subset <- names(qc.objects) %in% aries$samples$Sample_Name
+        qc.summary <- meffil.qc.summary(qc.objects[in.subset], parameters=qc.parameters)
+        meffil.qc.report(qc.summary, output.file=report.filename)
+        
+        cat(date(), "Generating normalization report\n")
+        norm.objects <- readRDS(file.path(release.path, "norm_objects", paste0(name,".rds")))
+        meth.filename <- file.path(release.path, "betas", paste0(name,".gds"))
+        report.filename <- file.path(
+          reports.path,
+          paste0("norm-report-", name, ".html"))
+        in.subset <- names(norm.objects) %in% aries$samples$Sample_Name
+        pcs <- meffil.methylation.pcs(
+          meth.filename,
+          probe.range=20000,
+          samples=aries$samples$Sample_Name,
+          autosomal=T)
+        norm.parameters<-meffil.normalization.parameters(
+          norm.objects,
+          variables=intersect(c("Slide","BCD_plate","time_point"), colnames(aries$samples)),
+          control.pcs=1:10,
+          batch.pcs=1:10)
+        norm.summary <- meffil.normalization.summary(norm.objects[in.subset], pcs,parameters=norm.parameters)
+        meffil.normalization.report(norm.summary,output.file=report.filename)
+    }
+    
     invisible(new.path)
 }
 
