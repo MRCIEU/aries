@@ -294,7 +294,7 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
           samples=aries$samples$Sample_Name,
           autosomal=T)
         norm.parameters<-meffil.normalization.parameters(
-          norm.objects,
+          norm.objects[in.subset],
           variables=intersect(c("Slide","BCD_plate","time_point"), colnames(aries$samples)),
           control.pcs=1:10,
           batch.pcs=1:10)
