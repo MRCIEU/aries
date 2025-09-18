@@ -196,6 +196,11 @@ aries.save.release <- function(release.path, samplesheet,
 #' 
 #' @export
 aries.copy.release <- function(release.path, new.path, remove.ids) {
+    if (!require(meffil)) {
+      stop(paste0(
+        "This function requires 'meffil'\n",
+        "(https://github.com/perishky/meffil/blob/master/readme.md#installation)"))
+    }
     dir.create(new.path, recursive=T)
     
     directories <- unique(dirname(list.files(release.path, recursive=T)))
@@ -269,14 +274,18 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
         cat(date(), "Generating QC report\n")
         qc.objects <- readRDS(file.path(release.path, "qc_objects", paste0(name,".rds")))
         qc.parameters <- meffil.qc.parameters(
-          beadnum.samples.threshold             = 0.1,  ## remove samples with >10% probes with bead count < 3
-          detectionp.samples.threshold          = 0.1,  ## remove samples with >10% probes with detection p > 0.01 
-          detectionp.cpgs.threshold             = 0.1,  ## remove cpgs with ...
-          beadnum.cpgs.threshold                = 0.1,  ## remove cpgs with ...
-          sex.outlier.sd                        = 5,    ## flag pred sex score outliers (>5 SDs)
-          snp.concordance.threshold             = 0.95, ## flag snp probes with below 95% concordance genotypes
-          sample.genotype.concordance.threshold = 0.8)  ## flag samples with <80% snp concordance with genotypes
-        report.filename <- file.path(reports.path, "qc", paste0("qc-report-",name, ".html"))
+          sex.outlier.sd = 5,
+          detectionp.samples.threshold = 0.1,
+          beadnum.samples.threshold = 0.1,
+          detectionp.cpgs.threshold = 0.1,
+          beadnum.cpgs.threshold = 0.1,
+          snp.concordance.threshold = 0.95,
+          sample.genotype.concordance.threshold = 0.8
+        )
+        report.filename <- file.path(
+          reports.path,
+          "qc",
+          paste0("qc-report-",name, ".html"))
         in.subset <- names(qc.objects) %in% aries$samples$Sample_Name
         qc.summary <- meffil.qc.summary(qc.objects[in.subset], parameters=qc.parameters)
         meffil.qc.report(qc.summary, output.file=report.filename)
@@ -286,6 +295,7 @@ aries.copy.release <- function(release.path, new.path, remove.ids) {
         meth.filename <- file.path(release.path, "betas", paste0(name,".gds"))
         report.filename <- file.path(
           reports.path,
+          "normalization",
           paste0("norm-report-", name, ".html"))
         in.subset <- names(norm.objects) %in% aries$samples$Sample_Name
         pcs <- meffil.methylation.pcs(
