@@ -2,7 +2,7 @@
 
 Functions for loading the
 [http://www.ariesepigenomics.org.uk/](ARIES)
-DNA methylation profiles.
+DNA methylation Illumina Beadchip profiles
 
 ## Accessible Resource for Integrated Epigenomic Studies (ARIES)
 
